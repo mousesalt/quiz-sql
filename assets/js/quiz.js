@@ -249,9 +249,17 @@ form.addEventListener("submit", async event => {
     $("saveStatus").className = "save-status ok";
     $("result").hidden = false;
     $("result").scrollIntoView({ behavior: "smooth", block: "start" });
-    $("formMessage").textContent = "Pengiriman berhasil.";
     submitted = true;
     questionsEl.querySelectorAll("input").forEach(input => { input.disabled = true; });
+    $("submitBtn").textContent = "Berhasil — kembali ke halaman login…";
+    $("formMessage").textContent = "Nilai berhasil disimpan. Anda akan dialihkan ke halaman login dalam 3 detik.";
+
+    // Clear the current student's identity and return to login after showing the result briefly.
+    // Use replace() so the browser Back button does not reopen the submitted quiz page.
+    window.setTimeout(() => {
+      try { sessionStorage.removeItem("ifelseQuizStudent"); } catch (_) {}
+      window.location.replace("login.html");
+    }, 3000);
   } catch (error) {
     console.error(error);
     $("formMessage").textContent = "Gagal menyimpan nilai: " + (error.message || "Periksa koneksi dan deployment Apps Script.");
