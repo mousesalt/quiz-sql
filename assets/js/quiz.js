@@ -32,7 +32,7 @@ function getWebAppUrl() {
   return url;
 }
 
-function jsonp(action, params = {}) {
+function jsonpOnce(action, params = {}) {
   return new Promise((resolve, reject) => {
     let finished = false;
     const callbackName = "__quizJsonp_" + Date.now() + "_" + Math.random().toString(36).slice(2);
@@ -58,15 +58,43 @@ function jsonp(action, params = {}) {
     };
     script.onerror = () => {
       cleanup();
-      reject(new Error("Tidak dapat menghubungi Google Sheets. Periksa URL deployment dan koneksi internet."));
+      reject(new Error("GAS_JSONP_NETWORK: Browser gagal memuat respons Google Apps Script."));
     };
     const timer = setTimeout(() => {
       cleanup();
-      reject(new Error("Google Sheets tidak merespons. Coba lagi beberapa saat."));
+      // Treat a timeout like a transport failure so jsonp() actually retries.
+      reject(new Error("GAS_JSONP_NETWORK: Google Apps Script tidak mengirim callback sebelum batas waktu."));
     }, 20000);
     script.src = url.toString();
     document.head.appendChild(script);
   });
+}
+
+// Apps Script ContentService redirects to script.googleusercontent.com. A transient
+// redirect/network error can happen; retry those failures before showing a final error.
+async function jsonp(action, params = {}) {
+  let lastError;
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await jsonpOnce(action, params);
+    } catch (error) {
+      lastError = error;
+      const isNetworkFailure = String(error?.message || "").startsWith("GAS_JSONP_NETWORK:");
+      if (!isNetworkFailure || attempt === attempts) break;
+      await new Promise(resolve => setTimeout(resolve, 700 * attempt));
+    }
+  }
+
+  if (String(lastError?.message || "").startsWith("GAS_JSONP_NETWORK:")) {
+    throw new Error(
+      "Gagal memuat respons Google Apps Script setelah 3 percobaan. " +
+      "Pastikan URL di assets/js/config.js adalah URL Web App /exec, " +
+      "akses deployment mengizinkan pengguna tanpa login, dan deployment sudah diperbarui. " +
+      "Tes URL secara langsung di browser dengan menambahkan ?action=getQuestions."
+    );
+  }
+  throw lastError || new Error("Google Apps Script tidak dapat dihubungi.");
 }
 
 function makeRequestId() {
