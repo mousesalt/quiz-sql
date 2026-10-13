@@ -3,54 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Kuis Informatika If-Else dan dasar SQL dengan penilaian database Supabase.">
+  <meta name="description" content="Kuis Informatika If-Else dan dasar SQL dengan penyimpanan nilai di Google Sheets.">
   <title>Kuis Informatika — If-Else dan SQL</title>
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/quiz.js" defer></script>
 </head>
 <body>
-<header class="hero"><div class="wrap">
-  <p class="eyebrow">INFORMATIKA · MINGGU 14</p>
-  <h1>Kuis If-Else dan Dasar SQL</h1>
-  <p>20 soal pilihan ganda · Penilaian dilakukan di database Supabase.</p>
-</div></header>
-<main class="wrap">
-  <section class="panel">
-    <h2>Petunjuk</h2>
-    <ul>
-      <li>Isi nama lengkap dan kelas dengan benar.</li>
-      <li>Jawab semua 20 soal pilihan ganda.</li>
-      <li>Setiap soal bernilai 5 poin; nilai maksimum 100.</li>
-      <li>Nilai dihitung oleh fungsi SQL di Supabase, bukan oleh browser.</li>
-    </ul>
-    <p class="notice"><b>Privasi:</b> nama, kelas, nilai, jumlah jawaban benar, dan waktu pengerjaan disimpan di database guru.</p>
-  </section>
-  <form id="quizForm" class="panel" novalidate>
-    <div class="student-banner">
-      <div><span class="muted">Siswa</span><strong id="studentIdentity">Memuat identitas…</strong></div>
-      <a href="login.html" class="change-student">Ganti siswa</a>
-    </div>
-    <div class="quiz-heading">
-      <div><h2>Soal Kuis</h2><p>Materi If-Else, interaksi tombol, dan dasar SQL.</p></div>
-      <span id="progress" class="progress">Memuat soal…</span>
-    </div>
-    <div id="questions"><p>Memuat soal dari database…</p></div>
-    <div class="actions">
-      <button class="btn primary" type="submit" id="submitBtn" disabled>Kirim Jawaban & Simpan Nilai</button>
-      <button class="btn secondary" type="button" id="reloadBtn">Muat Ulang Soal</button>
-    </div>
-    <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
-  </form>
-  <section id="result" class="panel result" hidden aria-live="polite">
-    <p class="eyebrow">HASIL KUIS</p><h2 id="resultTitle">Hasil</h2>
-    <div class="score"><strong id="score">0</strong><span>/100</span></div>
-    <p id="resultMessage"></p><p id="resultMeta" class="muted"></p><p id="saveStatus" class="save-status"></p>
-  </section>
-  <footer>
-    <p>Guru melihat nilai di Supabase Dashboard → Table Editor → <code>quiz_results</code>.</p>
-    <p>Jangan masukkan <code>service_role</code> key ke website atau repository publik.</p>
-  </footer>
-</main>
-</body></html>
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">INFORMATIKA · MINGGU 14</p>
+    <h1>Kuis If-Else dan Dasar SQL</h1>
+    <p>20 soal pilihan ganda · Penilaian dan penyimpanan nilai menggunakan Google Sheets.</p>
+  </div></header>
+
+  <main class="wrap">
+    <section class="panel">
+      <h2>Petunjuk</h2>
+      <ul>
+        <li>Isi nama lengkap dan kelas dengan benar.</li>
+        <li>Jawab semua 20 soal pilihan ganda.</li>
+        <li>Setiap soal bernilai 5 poin; nilai maksimum 100.</li>
+        <li>Nilai dihitung di Google Apps Script; kunci jawaban tidak dikirim ke browser siswa.</li>
+      </ul>
+      <p class="notice"><b>Privasi:</b> nama, kelas, nilai, jumlah jawaban benar, dan waktu pengerjaan disimpan di Google Sheets milik guru.</p>
+    </section>
+
+    <form id="quizForm" class="panel" novalidate>
+      <div class="student-banner">
+        <div><span class="muted">Siswa</span><strong id="studentIdentity">Memuat identitas…</strong></div>
+        <a href="login.html" class="change-student">Ganti siswa</a>
+      </div>
+      <div class="quiz-heading">
+        <div><h2>Soal Kuis</h2><p>Materi If-Else, interaksi tombol, dan dasar SQL.</p></div>
+        <span id="progress" class="progress">Memuat soal…</span>
+      </div>
+      <div id="questions"><p>Memuat soal dari Google Sheets…</p></div>
+      <div class="actions">
+        <button class="btn primary" type="submit" id="submitBtn" disabled>Kirim Jawaban &amp; Simpan Nilai</button>
+        <button class="btn secondary" type="button" id="reloadBtn">Muat Ulang Soal</button>
+      </div>
+      <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+    </form>
+
+    <section id="result" class="panel result" hidden aria-live="polite">
+      <p class="eyebrow">HASIL KUIS</p><h2 id="resultTitle">Hasil</h2>
+      <div class="score"><strong id="score">0</strong><span>/100</span></div>
+      <p id="resultMessage"></p><p id="resultMeta" class="muted"></p><p id="saveStatus" class="save-status"></p>
+    </section>
+
+    <footer>
+      <p>Guru melihat hasil di Google Sheets → tab <code>Nilai</code>.</p>
+      <p>Spreadsheet tetap privat. Jangan membagikan akses editor spreadsheet kepada siswa.</p>
+    </footer>
+  </main>
+</body>
+</html>

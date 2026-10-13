@@ -5,36 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login Siswa — Kuis Informatika</title>
   <link rel="stylesheet" href="assets/css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/login.js" defer></script>
 </head>
 <body>
-<header class="hero"><div class="wrap">
-  <p class="eyebrow">INFORMATIKA · MINGGU 14</p>
-  <h1>Login Siswa</h1>
-  <p>Masukkan nama dan kelas untuk memulai kuis.</p>
-</div></header>
-<main class="wrap">
-  <section class="panel login-panel">
-    <h2>Identitas Siswa</h2>
-    <form id="loginForm" novalidate>
-      <div class="fields">
-        <label for="studentName">Nama lengkap
-          <input id="studentName" type="text" maxlength="100" required autocomplete="name" placeholder="Nama lengkap">
-        </label>
-        <label for="studentClass">Kelas
-          <input id="studentClass" type="text" maxlength="30" required placeholder="Contoh: XII DKV">
-        </label>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="startBtn" type="submit">Mulai Kuis</button>
-      </div>
-      <p id="loginMessage" class="form-message" role="status" aria-live="polite"></p>
-    </form>
-    <p class="muted">Pastikan nama dan kelas benar sebelum memulai.</p>
-  </section>
-  <footer><p>Setelah kuis dikirim, hasil nilai disimpan ke database Supabase.</p></footer>
-</main>
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">INFORMATIKA · MINGGU 14</p>
+    <h1>Login Siswa</h1>
+    <p>Masukkan nama dan kelas untuk memulai kuis.</p>
+  </div></header>
+  <main class="wrap">
+    <section class="panel login-panel">
+      <h2>Identitas Siswa</h2>
+      <form id="loginForm" novalidate>
+        <div class="fields">
+          <label for="studentName">Nama lengkap
+            <input id="studentName" type="text" maxlength="100" required autocomplete="name" placeholder="Nama lengkap">
+          </label>
+          <label for="studentClass">Kelas
+            <input id="studentClass" type="text" maxlength="30" required placeholder="Contoh: XII DKV">
+          </label>
+        </div>
+        <div class="actions"><button class="btn primary" id="startBtn" type="submit">Mulai Kuis</button></div>
+        <p id="loginMessage" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+      <p class="muted">Pastikan nama dan kelas benar sebelum memulai.</p>
+    </section>
+    <footer><p>Setelah kuis dikirim, hasil nilai disimpan ke Google Sheets milik guru.</p></footer>
+  </main>
 </body>
 </html>
