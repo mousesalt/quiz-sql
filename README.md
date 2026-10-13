@@ -176,28 +176,148 @@ Nilai dihitung di server dengan rumus `jumlah benar / 20 × 100` sehingga setiap
 - Untuk ujian berisiko tinggi, tambahkan autentikasi siswa, kode ujian/percobaan, pembatasan pengiriman, serta pemantauan penyalahgunaan sebelum digunakan.
 - Aplikasi bergantung pada ketersediaan dan kuota Google Apps Script/Google Sheets. Terapkan perlindungan tambahan sebelum dipakai dalam skala besar.
 
-## Roadmap
+## Roadmap Pengembangan Multi-Mata-Pelajaran
 
-### Selesai / tersedia
+Tujuan utama roadmap ini adalah agar guru dapat **menambah dan memilih beberapa mata pelajaran dari satu website**, dengan bank soal dan rekap nilai terpisah per mata pelajaran. Backend tetap menggunakan Google Apps Script dan Google Sheets; GitHub Pages tetap menjadi hosting frontend.
 
-- [x] Memindahkan pembacaan bank soal dan penyimpanan nilai dari Supabase ke Google Sheets + Google Apps Script.
-- [x] Memuat 20 soal aktif dari tab `Soal`.
-- [x] Menghitung nilai di backend agar kunci jawaban tidak dikirim ke browser.
-- [x] Menyimpan nama, kelas, jumlah jawaban benar, nilai, dan waktu pengerjaan pada tab `Nilai`.
-- [x] Mendukung pembacaan lintas domain dari GitHub Pages melalui JSONP dan pengiriman hasil melalui POST.
-- [x] Memperbaiki penyimpanan operator JavaScript seperti `===`, `==`, dan `=` sebagai teks biasa di Google Sheets.
-- [x] Mengarahkan siswa kembali ke halaman login sekitar 3 detik setelah nilai berhasil disimpan, sekaligus menghapus sesi siswa pada browser.
+> **Status saat ini:** versi dasar kuis sudah berjalan untuk satu bank soal. Multi-mata-pelajaran belum dianggap selesai sebelum seluruh kriteria penerimaan pada milestone terkait terpenuhi. Urutan milestone di bawah adalah urutan pengerjaan yang disarankan, bukan klaim bahwa fiturnya sudah tersedia.
 
-### Rencana pengembangan
+### Ringkasan milestone
 
-- [ ] Menambahkan kode peserta atau autentikasi yang lebih kuat daripada nama dan kelas.
-- [ ] Menambahkan perlindungan percobaan ganda/idempotensi agar satu sesi ujian tidak menghasilkan nilai duplikat.
-- [ ] Membuat halaman rekap guru dengan pencarian, filter kelas, dan ekspor CSV.
-- [ ] Menambahkan pengacakan urutan soal/pilihan serta opsi batas waktu yang bisa diatur guru.
-- [ ] Menambahkan pemeriksaan kesehatan endpoint dan tes otomatis untuk alur login, pemuatan soal, pengiriman, serta penyimpanan nilai.
+| ID | Milestone GitHub | Prioritas | Hasil utama | Ketergantungan |
+|---|---|---|---|---|
+| M0 | Stabilkan dan cadangkan versi aktif | Wajib | Versi kuis yang saat ini berjalan aman untuk dijadikan baseline | — |
+| M1 | Siapkan struktur data multi-mapel | Wajib | `MataPelajaran`, `subject_id` pada soal, data lama tetap aman | M0 |
+| M2 | Tambahkan pemilih mata pelajaran | Wajib | Siswa dapat memilih mapel sebelum mulai mengerjakan | M1 |
+| M3 | Muat dan nilai soal secara dinamis per mapel | Wajib | Setiap mapel memuat bank soal dan jumlah soal yang sesuai | M1, M2 |
+| M4 | Simpan nilai dan riwayat per mapel | Wajib | Setiap hasil tercatat bersama mata pelajaran dan percobaan | M3 |
+| M5 | Pengelolaan bank soal yang mudah untuk guru | Berikutnya | Guru dapat menambah/mengimpor dan mengaktifkan soal melalui Sheets | M1–M4 |
+| M6 | Rekap nilai, ekspor, dan penguatan keamanan | Berikutnya | Rekap per mapel/kelas, CSV, dan pengujian keamanan lebih baik | M4, M5 |
 
-Roadmap ini mencatat status fitur yang ada dan arah pengembangan yang direncanakan; item pada bagian rencana belum dianggap tersedia sampai kode implementasinya dipublikasikan.
+---
 
-## Lisensi
+### M0 — Stabilkan dan cadangkan versi aktif
 
-Periksa file `LICENSE` pada repository jika tersedia. Jika belum ada, jangan mengasumsikan lisensi tertentu untuk penggunaan ulang atau distribusi kode.
+**Tujuan:** memastikan versi yang sudah berjalan dapat dipulihkan sebelum struktur database diubah.
+
+**Issue yang dikerjakan:**
+- [ ] Buat salinan/backup spreadsheet Google Sheets yang saat ini aktif.
+- [ ] Catat URL Web App `/exec` yang benar; jangan menyimpan URL privat sebagai rahasia di README publik.
+- [ ] Catat branch dan file frontend yang benar-benar dipublikasikan oleh GitHub Pages.
+- [ ] Uji satu alur lengkap: login → muat 20 soal → kirim jawaban → nilai tersimpan di `Nilai` → kembali ke login.
+- [ ] Simpan contoh hasil pengujian dan pastikan kunci jawaban tidak dikirim dalam respons soal.
+
+**Kriteria selesai:** alur kuis versi saat ini berhasil diuji; backup dapat dibuka; ada cara untuk memulihkan frontend dan spreadsheet jika migrasi gagal.
+
+### M1 — Siapkan struktur data multi-mapel
+
+**Tujuan:** menambahkan dukungan banyak mapel tanpa menghilangkan data kuis yang sekarang.
+
+**Perubahan Google Sheets:**
+- [ ] Buat tab `MataPelajaran` dengan kolom `subject_id`, `subject_name`, `subject_code`, `description`, `active`.
+- [ ] Tambahkan kolom `subject_id` pada tab `Soal`.
+- [ ] Isi `subject_id` untuk seluruh 20 soal lama, misalnya `informatika`.
+- [ ] Gunakan ID yang stabil dan unik seperti `informatika`, `matematika`, dan `bahasa-indonesia`; jangan menggunakan nama tampilan sebagai ID utama.
+- [ ] Jangan menghapus atau mengganti kolom lama yang sedang digunakan backend sampai kode kompatibel siap.
+
+**Contoh baris `MataPelajaran`:**
+
+| subject_id | subject_name | subject_code | description | active |
+|---|---|---|---|---|
+| `informatika` | Informatika | INF | If-Else, interaksi tombol, dan dasar SQL | TRUE |
+| `matematika` | Matematika | MAT | Bank soal Matematika | FALSE |
+| `bahasa-indonesia` | Bahasa Indonesia | BIN | Bank soal Bahasa Indonesia | FALSE |
+
+Mapel selain Informatika dapat tetap `FALSE` sampai soal dan pengujiannya siap.
+
+**Kriteria selesai:** setiap soal lama terkait dengan satu `subject_id`; 20 soal lama tetap dapat dibaca; data hasil lama tetap utuh; mapel aktif/nonaktif bisa dikelola melalui Sheets.
+
+### M2 — Tambahkan pemilih mata pelajaran
+
+**Tujuan:** membuat alur siswa memilih mapel setelah mengisi identitas.
+
+**Issue yang dikerjakan:**
+- [ ] Tambahkan endpoint baca `getSubjects` yang hanya mengembalikan mapel aktif.
+- [ ] Tambahkan tampilan pilih mapel pada alur login, sebelum masuk ke halaman pengerjaan.
+- [ ] Simpan `subject_id` pilihan ke sesi kuis bersama identitas siswa.
+- [ ] Tampilkan nama mapel di judul halaman kuis.
+- [ ] Berikan pesan yang jelas jika daftar mapel kosong atau mapel belum mempunyai soal aktif.
+- [ ] Pastikan siswa tidak dapat memulai kuis dengan `subject_id` kosong atau mapel nonaktif.
+
+**Kriteria selesai:** setelah guru menambahkan baris mapel baru yang aktif di `MataPelajaran`, mapel tersebut muncul di halaman pilihan tanpa mengubah daftar mapel langsung di HTML. Mapel tetap tidak dapat dipakai untuk kuis sampai bank soalnya tersedia.
+
+### M3 — Muat soal dan hitung nilai secara dinamis per mapel
+
+**Tujuan:** mengganti asumsi satu set 20 soal menjadi bank soal yang difilter berdasarkan mapel.
+
+**Issue yang dikerjakan:**
+- [ ] Perluas `getQuestions` untuk menerima `subject_id` dan hanya memuat soal aktif milik mapel itu.
+- [ ] Validasi `subject_id` di backend; jangan hanya mempercayai nilai yang dikirim browser.
+- [ ] Pastikan respons soal tidak mengandung `correct_option` atau `explanation`.
+- [ ] Hapus asumsi jumlah soal selalu 20 pada frontend dan backend.
+- [ ] Hitung nilai berdasarkan jumlah soal yang benar-benar dikirim: `jumlah benar / total soal × 100`.
+- [ ] Saat menerima jawaban, periksa bahwa seluruh ID soal berasal dari mapel yang dipilih dan jumlah jawabannya valid.
+- [ ] Tentukan perilaku untuk mapel tanpa soal aktif: tampilkan pesan dan jangan mulai kuis.
+
+**Kriteria selesai:** dua mapel dapat memiliki bank soal dengan jumlah berbeda, misalnya 20 soal Informatika dan 10 soal Matematika, serta masing-masing dinilai benar berdasarkan total soalnya sendiri. Kunci jawaban tetap diproses server-side.
+
+### M4 — Simpan nilai dan riwayat per mapel
+
+**Tujuan:** memastikan guru dapat membedakan hasil siswa untuk setiap mapel dan setiap percobaan.
+
+**Issue yang dikerjakan:**
+- [ ] Tambahkan `subject_id` dan `subject_name` pada hasil yang disimpan ke tab `Nilai`.
+- [ ] Simpan `total_questions`, `correct_count`, `score`, `student_name`, `student_class`, dan `submitted_at` secara konsisten.
+- [ ] Tambahkan `attempt_id` unik untuk identifikasi satu pengiriman; rancang pemeriksaan agar klik kirim berulang tidak membuat hasil ganda tanpa sengaja.
+- [ ] Pastikan redirect kembali ke login hanya dilakukan setelah backend mengonfirmasi hasil tersimpan.
+- [ ] Pastikan hasil dari mapel berbeda dapat dibedakan meskipun nama dan kelas siswa sama.
+- [ ] Uji kegagalan jaringan dan periksa spreadsheet sebelum mengizinkan siswa mengirim ulang.
+
+**Kriteria selesai:** tab `Nilai` menyimpan mapel dan total soal untuk setiap hasil; hasil lama tetap terbaca; pengiriman sukses diikuti alur hasil singkat lalu kembali ke login.
+
+### M5 — Pengelolaan bank soal untuk guru
+
+**Tujuan:** memudahkan guru menambah atau memperbarui soal tanpa mengedit JavaScript setiap kali ada materi/mapel baru.
+
+**Issue yang dikerjakan:**
+- [ ] Dokumentasikan template impor CSV/Google Sheets untuk bank soal.
+- [ ] Validasi kolom wajib, ID soal unik, `subject_id` terdaftar, opsi A–D tidak kosong, dan `correct_option` hanya `1`–`4`.
+- [ ] Gunakan kolom `active` untuk mengaktifkan/menonaktifkan soal tanpa menghapusnya.
+- [ ] Pertimbangkan kolom `topic`, `difficulty`, dan `question_order` bila diperlukan untuk memilih soal berdasarkan bab atau tingkat kesulitan.
+- [ ] Dokumentasikan prosedur pratinjau dan pengujian sebelum mapel diaktifkan untuk siswa.
+- [ ] Baru setelah kebutuhan jelas, pertimbangkan halaman admin terpisah; jangan menaruh kata sandi atau kunci admin di JavaScript publik.
+
+**Kriteria selesai:** guru dapat menambah bank soal dengan mengikuti template dan validasi, lalu mengaktifkannya tanpa mengubah kode website untuk setiap mapel.
+
+### M6 — Rekap nilai, ekspor, dan penguatan keamanan
+
+**Tujuan:** memudahkan analisis hasil dan menyiapkan aplikasi untuk penggunaan kelas yang lebih luas.
+
+**Issue yang dikerjakan:**
+- [ ] Tambahkan filter rekap menurut mata pelajaran, kelas, dan tanggal.
+- [ ] Tambahkan ekspor CSV dengan header yang jelas.
+- [ ] Tambahkan identitas percobaan/kode ujian atau autentikasi yang lebih kuat daripada nama dan kelas saja.
+- [ ] Terapkan validasi server-side untuk mapel, ID soal, jumlah jawaban, dan percobaan.
+- [ ] Uji mapel nonaktif, mapel tanpa soal, soal tidak valid, nilai 0/100, jaringan terputus, klik kirim berulang, dan redirect ke login.
+- [ ] Dokumentasikan batas kuota Google Apps Script/Sheets, backup rutin, serta pemulihan data.
+
+**Kriteria selesai:** guru dapat merekap dan mengekspor hasil per mapel; skenario kesalahan utama diuji; batas keamanan dan pemulihan sudah terdokumentasi.
+
+---
+
+## Membuat GitHub Milestones dan Issues
+
+Agar roadmap ini bisa dilacak di GitHub, buat milestone berikut melalui **Issues → Milestones → New milestone**. Nama milestone harus sama dengan judul pada tabel ringkasan.
+
+Untuk setiap milestone, buat satu issue untuk setiap kelompok tugas di bagian milestone terkait, lalu tetapkan milestone pada issue tersebut. Tandai issue selesai hanya setelah kriteria penerimaan milestone terpenuhi. Hindari menandai semua fitur roadmap sebagai selesai hanya karena README sudah diperbarui.
+
+**Urutan implementasi yang direkomendasikan:**
+
+1. Selesaikan M0 terlebih dahulu sebagai baseline yang aman.
+2. Kerjakan M1 dan uji kompatibilitas data lama.
+3. Kerjakan M2 agar siswa bisa memilih mapel.
+4. Kerjakan M3 agar soal dan penilaian benar-benar dinamis.
+5. Kerjakan M4 agar nilai terhubung dengan mapel.
+6. Setelah alur inti stabil, lanjutkan M5 dan M6.
+
+**Definisi selesai untuk fitur multi-mapel inti:** setidaknya dua mapel aktif, bank soal terpisah, jumlah soal dapat berbeda, kunci jawaban tidak terkirim ke browser, nilai tersimpan bersama identitas mapel, dan seluruh alur login → pilih mapel → kuis → simpan nilai → kembali login telah diuji.
