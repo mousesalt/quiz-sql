@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
 const form = $("loginForm");
+
 form.addEventListener("submit", event => {
   event.preventDefault();
   const name = $("studentName").value.trim();
@@ -9,11 +10,12 @@ form.addEventListener("submit", event => {
     (!name ? $("studentName") : $("studentClass")).focus();
     return;
   }
-  // Data identitas hanya diteruskan antarhalaman di browser, belum disimpan ke database.
-  // Nilai akhir disimpan oleh fungsi SQL saat siswa mengirim kuis.
-  const session = { name, studentClass };
+  if (name.length > 100 || studentClass.length > 30) {
+    $("loginMessage").textContent = "Nama maksimal 100 karakter dan kelas maksimal 30 karakter.";
+    return;
+  }
   try {
-    sessionStorage.setItem("ifelseQuizStudent", JSON.stringify(session));
+    sessionStorage.setItem("ifelseQuizStudent", JSON.stringify({ name, studentClass }));
   } catch (_) {
     $("loginMessage").textContent = "Browser tidak mengizinkan penyimpanan sesi. Aktifkan session storage lalu coba lagi.";
     return;
